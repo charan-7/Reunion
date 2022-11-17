@@ -1,10 +1,13 @@
 const express = require('express');
 const mongoose = require('mongoose');
+const dotenv = require('dotenv');
 const app = express();
 
 app.use(express.json());
 
-const uri = 'mongodb://0.0.0.0:27017/reunion';
+dotenv.config();
+
+const uri = process.env.MONOGO_DB_URI
 mongoose.connect(uri)
 .then(()=> console.log('connected to db...'))
 .catch((err) => console.log(err));
