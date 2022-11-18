@@ -4,7 +4,6 @@ const router = express.Router();
 
 const userModel = require('../model/userModel');
 const postModel = require('../model/postModel');
-const { json } = require('express');
 
 // create new post 
 router.post('/posts/', async(req, res) => {
@@ -24,7 +23,7 @@ router.post('/posts/', async(req, res) => {
             });
             await createPost.save();
 
-            return res.json({
+            return res.status(200).json({
                 postId: createPost._id,
                 title: title,
                 description: description,
@@ -36,23 +35,26 @@ router.post('/posts/', async(req, res) => {
             });
         }
     }
-    return res.status(404).json({
+    return res.status(400).json({
         msg: 'no user with that email...',
     });
 });
 
 // get post details by post id
-router.get('/posts/', async(req, res)=>{
-    const { id } = req.query;
+router.get('/posts/:id', async(req, res)=>{
+    const { id } = req.params;
     try{
         const getPost = await postModel.findById(id);
-        const totalLikes = getPost.likes.length;
-        const totalComments = getPost.comments.length;
-        return res.json({
-            id: getPost._id,
-            likeCount: totalLikes,
-            commentCount: totalComments,
-        });
+        if(getPost){
+            const totalLikes = getPost.likes.length;
+            const totalComments = getPost.comments.length;
+            return res.status(200).json({
+                id: getPost._id,
+                likeCount: totalLikes,
+                commentCount: totalComments,
+            });
+        }
+        return res.status(400).send('no post with that id...');
     }catch(err){
         return res.status(404).json({
             msg: err,
@@ -61,9 +63,9 @@ router.get('/posts/', async(req, res)=>{
 });
 
 // delete a post created by authenticated user
-router.delete('/posts/', async(req, res)=>{
+router.delete('/posts/:id', async(req, res)=>{
     const { email } = req.user;
-    const { id } = req.query;
+    const { id } = req.params;
     try{
         const getPost = await postModel.findById(id);
         const getUser = await userModel.findOne({
@@ -72,11 +74,11 @@ router.delete('/posts/', async(req, res)=>{
         if(getPost && getUser){
             if(getUser._id.valueOf() == getPost.userId.valueOf()){
                 await postModel.deleteOne({ userId: getUser._id });
-                return res.json({
+                return res.status(200).json({
                     msg: 'post deleted successfully...',
                 });
             }else{  
-                return res.json({
+                return res.status(401).json({
                     msg: 'no access to delete post...',
                 });
             }
@@ -101,11 +103,11 @@ router.get('/all_posts/', async(req, res) => {
                 userId: getUser._id,
             })
             .populate('comments');
-            return res.json({
+            return res.status(200).json({
                 posts: getPosts,
             });
         }
-        return res.json({
+        return res.status(400).json({
             msg: "no user with that email...",
         })
     }catch(err){

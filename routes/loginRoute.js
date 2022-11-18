@@ -25,6 +25,10 @@ router.post('/', async(req, res) => {
             email: email,
         });
 
+        const response = {
+            token: token
+        }
+
         if(findUser == null){
             const newUser = new userModel({
                 email: email,
@@ -33,19 +37,15 @@ router.post('/', async(req, res) => {
     
             try{
                 await newUser.save();
-                return res.json({
-                    "token": token,
-                });
+                return res.status(200).send(response);
             }catch(err){
-                return res.status(404).send("err");
+                return res.status(404).send(err);
             }
         }else{
-            return res.status(200).json({
-                "token": token,
-            });
+            return res.status(200).send(response);
         }
     }
-    return res.send("user not created...");
+    return res.status(400).send("some token error is facing...");
 });
 
 module.exports = router;

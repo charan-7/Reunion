@@ -7,8 +7,8 @@ const userModel = require('../model/userModel');
 const commentModel = require('../model/commentModel');
 
 // post a comment for particular post
-router.post('/comment/', async(req, res) => {
-    const { id } = req.query;
+router.post('/comment/:id', async(req, res) => {
+    const { id } = req.params;
     const { message } = req.body;
     const { email } = req.user;
     try{
@@ -24,11 +24,11 @@ router.post('/comment/', async(req, res) => {
             await createComment.save();
             getPost.comments.push(createComment._id);
             await getPost.save();
-            return res.json({
+            return res.status(200).json({
                 commentId: createComment._id,
             });
         }
-        return res.json({
+        return res.status(400).json({
             msg: 'no user or post with that id...',
         })
     }catch(err){

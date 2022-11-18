@@ -12,6 +12,7 @@ mongoose.connect(uri)
 .then(()=> console.log('connected to db...'))
 .catch((err) => console.log(err));
 
+// importing all required routes
 const loginRoute = require('./routes/loginRoute');
 const authorization = require('./authorization');
 const postRoute = require('./routes/postRoute');
@@ -26,6 +27,6 @@ app.use('/api', likeRoute);
 app.use('/api', commentRoute);
 app.use('/api', userRoute);
 
-app.listen(5000, ()=>{
+module.exports = app.listen(5000, ()=>{
     console.log('connected to port 5000...');
 })

@@ -12,15 +12,16 @@ router.get('/user/', async(req, res) => {
             email: email,
         });
         if(getUser){
-            return res.json({
+            return res.status(200).json({
                 email: getUser.email,
                 followers: getUser.followers.length,
                 following: getUser.following.length,
             });
+        }else{
+            return res.status(400).json({
+                msg: 'no user with that email...',
+            });
         }
-        return res.json({
-            msg: 'no user with that email...',
-        })
     }catch(err){
         return res.status(404).json({
             msg: err,
@@ -29,8 +30,8 @@ router.get('/user/', async(req, res) => {
 });
 
 // post request for following the specific user
-router.post('/follow/', async(req, res) => {
-    const { id } = req.query;
+router.post('/follow/:id', async(req, res) => {
+    const { id } = req.params;
     const { email } = req.user;
 
     const fetchUser = await userModel.findById(id);
@@ -45,10 +46,10 @@ router.post('/follow/', async(req, res) => {
                 await getUser.save();
                 fetchUser.followers.push(getUser._id);
                 await fetchUser.save();
-                return res.json({
+                return res.status(200).json({
                     msg: 'following the user successfully...',
                 });
-            }return res.json({
+            }return res.status(400).json({
                 msg: 'cannot follow your self...',
             });
         }catch(err){
@@ -63,8 +64,8 @@ router.post('/follow/', async(req, res) => {
 });
 
 // post request for unfollowing specific user
-router.post('/unfollow/', async(req, res) => {
-    const { id } = req.query;
+router.post('/unfollow/:id', async(req, res) => {
+    const { id } = req.params;
     const { email } = req.user;
 
     const fetchUser = await userModel.findById(id);
@@ -77,10 +78,10 @@ router.post('/unfollow/', async(req, res) => {
             if(getUser._id.valueOf() != id){
                 getUser.following.pull({_id: fetchUser._id});
                 await getUser.save();
-                return res.json({
+                return res.status(200).json({
                     msg: 'unfollowed the user successfully...',
                 });
-            }return res.json({
+            }return res.status(400).json({
                 msg: 'cannot unfollow your self...',
             });
         }catch(err){
@@ -89,7 +90,7 @@ router.post('/unfollow/', async(req, res) => {
             });
         }
     }
-    return res.json({
+    return res.status(404).json({
         msg: 'no user with that id...',
     });
 })
